@@ -1,0 +1,11 @@
+{% load i18n static %}
+<link rel="stylesheet" href="{% static 'django_datastar_toolbar/css/datastar_store.css' %}">
+<div data-datastar-store-panel>
+  <p role="status" data-datastar-store-status>{% translate "Waiting for a JSON projection…" %}</p>
+  <div class="djdt-datastar-controls">
+    <label for="djdt-datastar-search">{% translate "Search signal names" %}</label>
+    <input id="djdt-datastar-search" type="search" autocomplete="off" title="{% translate 'Press Enter for the next match' %}" data-datastar-store-search>
+    <span data-datastar-store-match-count role="status" hidden></span>
+  </div>
+  <pre data-datastar-store-output></pre>
+</div>

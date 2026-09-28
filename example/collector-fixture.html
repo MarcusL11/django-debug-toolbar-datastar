@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en" data-signals="{preexisting: 'before', _private: 'top-secret', items: [{_private: 'array-secret', label: 'item'}]}">
+<head>
+  <meta charset="utf-8">
+  <title>Datastar built-in collector semantics fixture</title>
+  <script>
+    // Installed before Datastar loads; this marker is only for this browser probe.
+    window.datastarReadyEvents = 0;
+    document.addEventListener('datastar-ready', () => { window.datastarReadyEvents += 1; });
+  </script>
+</head>
+<body>
+  <p>This fixture tests Datastar's built-in JSON signals collector, independently of the installed toolbar.</p>
+</body>
+</html>
