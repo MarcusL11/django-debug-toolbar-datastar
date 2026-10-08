@@ -10,6 +10,7 @@ class DatastarStorePanel(Panel):
     is_async = True
     title = _("Current Signal Store (JSON projection)")
     nav_title = _("Datastar Signals")
+    nav_icon = "django_datastar_toolbar/img/rocket.svg"
     template = "django_datastar_toolbar/panels/datastar_store.html"
 
     @property

@@ -52,6 +52,19 @@ class DatastarStorePanelTests(SimpleTestCase):
             deferred["scripts"], ["/static/django_datastar_toolbar/js/datastar_store.js"]
         )
 
+    def test_navigation_shows_decorative_rocket_icon(self):
+        self.assertEqual(
+            DatastarStorePanel.nav_icon, "django_datastar_toolbar/img/rocket.svg"
+        )
+        for eager in (False, True):
+            with self.subTest(eager=eager):
+                response, _ = self.request_with_toolbar(eager=eager)
+                self.assertContains(
+                    response,
+                    'class="djdt-nav-icon" aria-hidden="true" focusable="false"',
+                )
+                self.assertContains(response, '<circle cx="15.5" cy="8.5" r="1.5"/>')
+
     def test_eager_panel_renders_frozen_interface(self):
         response, toolbar = self.request_with_toolbar(eager=True)
         self.assertContains(response, "data-datastar-store-output")
