@@ -30,4 +30,4 @@ Source = "https://github.com/MarcusL11/django-debug-toolbar-datastar"
 packages = ["src/django_datastar_toolbar"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src/django_datastar_toolbar", "/README.md", "/LICENSE", "/pyproject.toml", "/example", "/addon_tests"]
+include = ["/src/django_datastar_toolbar", "/README.md", "/LICENSE", "/pyproject.toml"]

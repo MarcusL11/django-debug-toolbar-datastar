@@ -1,55 +1,70 @@
 # Datastar Signals for Django Debug Toolbar (development package)
 
-A **opt-in third-party panel** that appears inside Django Debug Toolbar. It displays a browser-side JSON projection of the current page-global Datastar signal store. It is not maintained or supported by Django Debug Toolbar's maintainers. This independent package's repository is [MarcusL11/django-debug-toolbar-datastar](https://github.com/MarcusL11/django-debug-toolbar-datastar); its code is licensed under [BSD-3-Clause](LICENSE). It has not been released to PyPI; version `0.1.0.dev0` is a development build, not a compatibility or release promise. Report issues in this repository, not the Django Debug Toolbar issue tracker.
+This is an **third-party panel** for [ Django Debug Toolbar ]( https://django-debug-toolbar.readthedocs.io/en/latest/ ). It displays a browser-side JSON projection of the current page's [ Datastar Reactive Signal ]( https://data-star.dev/guide/reactive_signals ) store. This package is still in the process of being developed. It has not been released to PyPI.
 
 ## AI-assisted development
 
 Large language models (LLMs) were used to help generate portions of this
-project's code and documentation. All LLM-assisted content was reviewed and
-approved by the author, who remains responsible for the final work.
+project's code and documentation. All LLM-assisted content was reviewed and edited and
+by myself.
 
-## Install and configure
+## Core idea
 
-Install the built wheel in a development environment with Django Debug Toolbar 8.0.0 or newer. Then add the app to `INSTALLED_APPS`:
+Django Debug Toolbar provides the panel UI, but Datastar actually owns the signals in the browser. Those signals live only in the page’s DOM (not in the HTTP response), so Django itself can't read them. The page template just includes a status line, a search box, and an output element, and a small script creates a hidden "collector" element in the body that Datastar uses.
+
+The collector is a live text view of the signal store: Datastar writes compact JSON into a data attribute (data-json-signals__terse) and the panel reads that text to render the current state. The panel only shows the current projection — it doesn't keep a history. For example, if a "count" is 2 the collector holds {"count":2}; when it becomes 3 a MutationObserver calls render(), the panel parses the new JSON, and the UI updates. A panel that opens later just reads the collector's current JSON and doesn't need past events.
+
+## Install in a Django project
+
+Use a local development environment with Python 3.10+, Django 5.2+, and Django Debug Toolbar 8.0.0+.
+
+Install the package from a fixed GitHub commit in your project's virtual environment. The package is not on PyPI.
+
+```sh
+python -m pip install "git+https://github.com/MarcusL11/django-debug-toolbar-datastar.git@a03ca793f0fda690207ba4405cb93cf219c3b4a2"
+```
+
+Keep your existing apps, including `django.contrib.staticfiles` and `debug_toolbar`. Add `django_datastar_toolbar` to `INSTALLED_APPS`:
 
 ```python
 INSTALLED_APPS = [
-    # existing apps, including django.contrib.staticfiles and debug_toolbar
+    # Keep the other apps from your project here.
+    "django.contrib.staticfiles",
+    "debug_toolbar",
     "django_datastar_toolbar",
 ]
 ```
 
-Add `"django_datastar_toolbar.panels.DatastarStorePanel"` to your project's **existing complete ordered** `DEBUG_TOOLBAR_PANELS` list. If you have not set that option, setting it replaces the toolbar defaults; include every other panel you want to keep. There is no automatic registration. Keep the toolbar's normal middleware, URL, `DEBUG` and internal-IP setup, and enable Django's app-directory template loader (`APP_DIRS=True`). The panel needs the official **full** Datastar bundle on the page; Datastar core by itself does not register the built-in `data-json-signals` plugin. The package does not ship or inject a Datastar bundle or any Datastar Pro/Inspector assets.
+Add `"django_datastar_toolbar.panels.DatastarStorePanel"` to your existing complete ordered `DEBUG_TOOLBAR_PANELS` list. This setting replaces the toolbar defaults. Keep every other panel that you want to use.
 
-## What it displays
+For a short test only, you can use the History panel and the Datastar panel. This list removes the other default panels. Copy the complete panel list for your installed toolbar version if you want to keep them.
 
-The collector uses the full bundle's built-in `data-json-signals__terse` attribute on an add-on-owned, hidden light-DOM element. This is a live JSON **projection**, not a lossless inventory, request snapshot, or view-specific store. Every projected JSON value, including underscore paths, is shown. Search highlights names and paths; it does not hide values. A valid result may be stale if later serialization fails, and neither collector serialization nor rendering is size-bounded. The full raw projection remains in the host DOM and can be read by page scripts. Use only for local/development work with non-real data; do not treat the panel or search as redaction. The frozen interface has no in-panel warning, tree collapse, or view toggle. Django stores only a shell-availability marker, never browser signal values.
-
-## Standalone installed-distribution fixture
-
-Build in this directory with `python -m build`. Install the resulting wheel in a clean Python environment (alongside its dependencies), change to a directory **outside this repository**, and set `PYTHONPATH` to this directory's `example/` only. For example:
-
-```sh
-DJANGO_SETTINGS_MODULE=installed_settings python -m django check
-DJANGO_SETTINGS_MODULE=installed_settings python -m django findstatic django_datastar_toolbar/js/datastar_store.js
-DJANGO_SETTINGS_MODULE=installed_settings python -m django collectstatic --noinput
-DJANGO_SETTINGS_MODULE=installed_settings python /path/to/example/smoke.py
+```python
+DEBUG_TOOLBAR_PANELS = [
+    "debug_toolbar.panels.history.HistoryPanel",
+    "django_datastar_toolbar.panels.DatastarStorePanel",
+]
 ```
 
-Set `DJDT_STATIC_ROOT` to a temporary directory before `collectstatic`; set `DJDT_MANIFEST=1` to check hashed/manifest static processing as well. The `addon_tests/` directory is in the sdist, not the wheel: from an external working directory set `PYTHONPATH` to this add-on's root and `example/` (not `src/`), then run `DJANGO_SETTINGS_MODULE=installed_settings python -m django test addon_tests --noinput` to test the installed wheel and released toolbar. To view the demo, set `DATASTAR_FULL_BUNDLE` to a SHA-256-verified official v1.0.4 `datastar.js` file and run `DJANGO_SETTINGS_MODULE=installed_settings python -m django runserver 127.0.0.1:8002 --noreload`; visit `/demo/`. Install the browser test dependencies with `npm ci` and a Chromium binary with `npx playwright install chromium` to run the repository's Playwright harness `example/browser-smoke.mjs`. It accepts `DJANGO_PYTHON` (the clean venv), `DJANGO_CWD` (outside this checkout), and `DATASTAR_FULL_BUNDLE` and exercises eager/lazy, shadow/light DOM and live updates. No installation in your own Django project is necessary to inspect the package.
+Installing the package does not activate the toolbar or the panel. If your project does not use Django Debug Toolbar yet, follow its [installation guide](https://django-debug-toolbar.readthedocs.io/en/latest/installation.html). Add its middleware and URLs to your project. Set `DEBUG=True` for local development, allow your local IP in `INTERNAL_IPS`, and enable the app-directory template loader (`APP_DIRS=True`). The page must load the official full Datastar bundle. The core bundle alone does not include the built-in `data-json-signals` attribute.
 
-The deeper installed-wheel lifecycle suite (`example/browser-lifecycle.test.mjs`) tests delayed Datastar load (`/demo/?datastar=late`), panel replacement/cleanup, live mutation, stale and invalid projections, search, escaping, and sidecar layout. From this repository, with the clean wheel installed in the external environment:
-
-```sh
-DJANGO_PYTHON=/path/to/clean-venv/bin/python DJANGO_CWD=/path/outside/this/repo \
-  DATASTAR_FULL_BUNDLE=/path/to/official/datastar-v1.0.4-full.js npm run test:lifecycle
-```
-
-The separate browser-only collector semantics suite (`example/collector-probe.test.mjs`) does **not** prove wheel integration. It tests the official full and core v1.0.4 bundles; neither is included in this package. Both suites verify bundle SHA-256 before use:
+Run Django checks and find the add-on script:
 
 ```sh
-DATASTAR_FULL_BUNDLE=/path/to/official/datastar-v1.0.4-full.js \
-  DATASTAR_CORE_BUNDLE=/path/to/official/datastar-v1.0.4-core.js npm run test:collector
+python manage.py check
+python manage.py findstatic django_datastar_toolbar/js/datastar_store.js
 ```
 
-CI builds a wheel and runs Django checks, tests, asset discovery, and static collection against Django Debug Toolbar 8.0.0. The browser smoke is currently run manually. The installed-wheel smoke must use a fresh interpreter and cwd outside this source tree, or an editable/source checkout could mask missing files. The sidecar CSS targets toolbar-owned DOM selectors; the toolbar documents no public CSS API, so this styling needs retesting on upgrades. The selected `>=8.0.0` toolbar minimum is a tested baseline, not a claim that every future toolbar release, browser or Datastar version works. Before a PyPI release, check distribution-name ownership, review asset/provenance notices, and run a supported-version/asset/browser matrix.
+Start your project and open a page that uses Datastar. Select Datastar Signals in the toolbar, then change a sample signal and check the JSON display. The package does not ship or inject any Datastar bundle or Inspector assets.
+
+Use sample data only. This panel does not hide sensitive values, and its raw JSON projection remains in the page DOM.
+
+## Roadmap to a PyPI release
+
+- [ ] Select supported Python, Django, toolbar, Datastar, and browser versions. Run installed-wheel tests across this list.
+- [ ] Add browser tests to CI for lazy and eager panels, shadow and light DOM, and live signal changes.
+- [ ] Review license notices and third-party assets in the final source and build files.
+- [ ] First version. Update the install steps after the PyPI release.
+- [ ] Build wheel and source archives from the release commit. Check metadata, license, templates, static files, and the installed result.
+- [ ] Testing PyPI install in a Django project. 
+- [ ] Request s third-party panel listing request after release.
