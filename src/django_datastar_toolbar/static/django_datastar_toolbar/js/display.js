@@ -10,6 +10,46 @@ export function setStatus(panel, text) {
   if (status) status.hidden = !text;
 }
 
+export function renderProjection(panel, value) {
+  // Build the new display before replacing the old display.
+  const output = panel.querySelector("[data-datastar-store-output]");
+  if (!output) return false;
+  const fragment = document.createDocumentFragment();
+  appendJsonValue(fragment, value, "", 0);
+  output.replaceChildren(fragment);
+  output.hidden = false;
+  return true;
+}
+
+function appendJsonValue(parent, value, path, depth, marker) {
+  // Walk the JSON value and add text and path markers to the display.
+  if (!isBranch(value)) {
+    appendPrimitive(parent, value, marker);
+    return;
+  }
+
+  const array = Array.isArray(value);
+  const children = entries(value);
+
+  appendOpening(parent, value, marker);
+
+  for (const [index, [key, child]] of children.entries()) {
+    const childPath = displayPath(path, key);
+    const childMarker = keyMarker(key, childPath);
+    parent.append("\n", "  ".repeat(depth + 1));
+    if (array) {
+      appendJsonValue(parent, child, childPath, depth + 1, childMarker);
+    } else {
+      childMarker.textContent = JSON.stringify(key);
+      parent.append(childMarker, ": ");
+      appendJsonValue(parent, child, childPath, depth + 1);
+    }
+    if (index < children.length - 1) parent.append(",");
+  }
+  if (children.length) appendIndentNewline(parent, depth);
+  appendClosing(parent, array);
+}
+
 function isBranch(value) {
   // Treat arrays and non-null objects as JSON branches.
   return value !== null && typeof value === "object";
@@ -44,21 +84,17 @@ function keyMarker(key, path) {
   return marker;
 }
 
-function appendJsonValue(parent, value, path, depth, marker) {
-  // Walk the JSON value and add text and path markers to the display.
-  if (!isBranch(value)) {
-    const text = JSON.stringify(value);
-    if (marker) {
-      marker.textContent = text;
-      parent.append(marker);
-    } else {
-      parent.append(text);
-    }
-    return;
+function appendPrimitive(parent, value, marker) {
+  const text = JSON.stringify(value);
+  if (marker) {
+    marker.textContent = text;
+    parent.append(marker);
+  } else {
+    parent.append(text);
   }
+}
 
-  const array = Array.isArray(value);
-  const children = entries(value);
+function appendOpening(parent, array, marker) {
   const opening = array ? "[" : "{";
   if (marker) {
     marker.textContent = opening;
@@ -66,30 +102,12 @@ function appendJsonValue(parent, value, path, depth, marker) {
   } else {
     parent.append(opening);
   }
-  for (const [index, [key, child]] of children.entries()) {
-    const childPath = displayPath(path, key);
-    const childMarker = keyMarker(key, childPath);
-    parent.append("\n", "  ".repeat(depth + 1));
-    if (array) {
-      appendJsonValue(parent, child, childPath, depth + 1, childMarker);
-    } else {
-      childMarker.textContent = JSON.stringify(key);
-      parent.append(childMarker, ": ");
-      appendJsonValue(parent, child, childPath, depth + 1);
-    }
-    if (index < children.length - 1) parent.append(",");
-  }
-  if (children.length) parent.append("\n", "  ".repeat(depth));
+}
+
+function appendClosing(parent, array) {
   parent.append(array ? "]" : "}");
 }
 
-export function renderProjection(panel, value) {
-  // Build the new display before replacing the old display.
-  const output = panel.querySelector("[data-datastar-store-output]");
-  if (!output) return false;
-  const fragment = document.createDocumentFragment();
-  appendJsonValue(fragment, value, "", 0);
-  output.replaceChildren(fragment);
-  output.hidden = false;
-  return true;
+function appendIndentNewline(parent, depth) {
+  parent.append("\n", "  ".repeat(depth));
 }

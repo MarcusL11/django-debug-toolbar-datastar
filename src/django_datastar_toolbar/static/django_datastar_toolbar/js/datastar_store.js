@@ -12,6 +12,41 @@ let pendingTimer;
 let attachedContent;
 let projectionText = "";
 
+function sync() {
+  // Attach to the current toolbar and keep one collector for its panel.
+  // Checks whether the toolbar and our panel exist. It starts a collector 
+  // for a new panel or stops the old one. If the panel already exists, it calls render(), 
+  // which returns without changing the display when the JSON has not changed.
+  const nextToolbar = currentToolbar();
+  if (nextToolbar !== toolbar) {
+    stopCollector();
+    shellObserver?.disconnect();
+    toolbar?.removeEventListener("djdt.panel.render", onPanelRender);
+    toolbar?.removeEventListener("input", onInput);
+    toolbar?.removeEventListener("keydown", onKeyDown);
+    toolbar = nextToolbar;
+    if (toolbar) {
+      toolbar.addEventListener("djdt.panel.render", onPanelRender);
+      toolbar.addEventListener("input", onInput);
+      toolbar.addEventListener("keydown", onKeyDown);
+      shellObserver = new MutationObserver(sync);
+      shellObserver.observe(toolbar, { childList: true, subtree: true });
+    }
+  }
+  const panel = content();
+  if (!panel) {
+    stopCollector();
+    return;
+  }
+  if (panel !== attachedContent) {
+    stopCollector();
+    attachedContent = panel;
+    startCollector();
+  } else {
+    render();
+  }
+}
+
 function currentToolbar() {
   // Find the current Debug Toolbar in the host or its shadow root.
   const host = document.getElementById("djDebugRoot");
@@ -101,45 +136,14 @@ function startCollector() {
   render();
 }
 
-function sync() {
-  // Attach to the current toolbar and keep one collector for its panel.
-  const nextToolbar = currentToolbar();
-  if (nextToolbar !== toolbar) {
-    stopCollector();
-    shellObserver?.disconnect();
-    toolbar?.removeEventListener("djdt.panel.render", onPanelRender);
-    toolbar?.removeEventListener("input", onInput);
-    toolbar?.removeEventListener("keydown", onKeyDown);
-    toolbar = nextToolbar;
-    if (toolbar) {
-      toolbar.addEventListener("djdt.panel.render", onPanelRender);
-      toolbar.addEventListener("input", onInput);
-      toolbar.addEventListener("keydown", onKeyDown);
-      shellObserver = new MutationObserver(sync);
-      shellObserver.observe(toolbar, { childList: true, subtree: true });
-    }
-  }
-  const panel = content();
-  if (!panel) {
-    stopCollector();
-    return;
-  }
-  if (panel !== attachedContent) {
-    stopCollector();
-    attachedContent = panel;
-    startCollector();
-  } else {
-    render();
-  }
-}
-
 function onPanelRender(event) {
   // Check this panel when the toolbar adds its HTML.
+  // If the ID is DatastarStorePanel, it calls sync()
   if (event.detail?.panelId === panelId) sync();
 }
 
 function watchBody() {
-  // Watch body changes to find new toolbar content.
+  // Watch for a body change, then ask sync() to find the toolbar
   bodyObserver?.disconnect();
   bodyObserver = new MutationObserver(sync);
   if (document.body) bodyObserver.observe(document.body, { childList: true });

@@ -1,7 +1,6 @@
+from debug_toolbar.panels import Panel
 from django.templatetags.static import static
 from django.utils.translation import gettext_lazy as _
-
-from debug_toolbar.panels import Panel
 
 
 class DatastarStorePanel(Panel):
@@ -19,7 +18,10 @@ class DatastarStorePanel(Panel):
 
     @property
     def scripts(self):
-        return [*super().scripts, static("django_datastar_toolbar/js/datastar_store.js")]
+        return [
+            *super().scripts,
+            static("django_datastar_toolbar/js/datastar_store.js"),
+        ]
 
     def generate_stats(self, request, response):
         # Only shell availability is stored; browser values never cross to Django.

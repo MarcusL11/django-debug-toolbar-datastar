@@ -3,24 +3,6 @@ import { setText } from "./display.js";
 let matches = [];
 let currentMatch = 0;
 
-function showCurrentMatch(panel) {
-  // Mark the selected match, show its count, and scroll to it.
-  for (const match of matches)
-    match.classList.remove("djdt-datastar-current-match");
-  const count = panel.querySelector("[data-datastar-store-match-count]");
-  setText(
-    count,
-    matches.length
-      ? `${currentMatch + 1} of ${matches.length} matching paths (Enter for next)`
-      : "No matching signal names or paths."
-  );
-  if (matches.length) {
-    matches[currentMatch].classList.add("djdt-datastar-current-match");
-    if (panel.getClientRects().length)
-      matches[currentMatch].scrollIntoView({ block: "nearest" });
-  }
-}
-
 export function updateMatches(panel, hasProjection) {
   // Mark matching names and paths without hiding other values.
   const count = panel.querySelector("[data-datastar-store-match-count]");
@@ -73,3 +55,22 @@ export function resetSearch() {
   matches = [];
   currentMatch = 0;
 }
+function showCurrentMatch(panel) {
+  // Mark the selected match, show its count, and scroll to it.
+  for (const match of matches)
+    match.classList.remove("djdt-datastar-current-match");
+  const count = panel.querySelector("[data-datastar-store-match-count]");
+  setText(
+    count,
+    matches.length
+      ? `${currentMatch + 1} of ${matches.length} matching paths (Enter for next)`
+      : "No matching signal names or paths."
+  );
+  if (matches.length) {
+    matches[currentMatch].classList.add("djdt-datastar-current-match");
+    if (panel.getClientRects().length)
+      matches[currentMatch].scrollIntoView({ block: "nearest" });
+  }
+}
+
+
