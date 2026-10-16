@@ -2,12 +2,6 @@
 
 This is an **third-party panel** for [ Django Debug Toolbar ]( https://django-debug-toolbar.readthedocs.io/en/latest/ ). It displays a browser-side JSON projection of the current page's [ Datastar Reactive Signal ]( https://data-star.dev/guide/reactive_signals ) store. This package is still in the process of being developed. It has not been released to PyPI.
 
-## AI-assisted development
-
-Large language models (LLMs) were used to help generate portions of this
-project's code and documentation. All LLM-assisted content was reviewed and edited and
-by myself.
-
 ## Core idea
 
 Django Debug Toolbar provides the panel UI, but Datastar actually owns the signals in the browser. Those signals live only in the page’s DOM (not in the HTTP response), so Django itself can't read them. The page template just includes a status line, a search box, and an output element, and a small script creates a hidden "collector" element in the body that Datastar uses.
@@ -58,6 +52,12 @@ python manage.py findstatic django_datastar_toolbar/js/datastar_store.js
 Start your project and open a page that uses Datastar. Select Datastar Signals in the toolbar, then change a sample signal and check the JSON display. The package does not ship or inject any Datastar bundle or Inspector assets.
 
 Use sample data only. This panel does not hide sensitive values, and its raw JSON projection remains in the page DOM.
+
+## AI-assisted development
+
+Large language models (LLMs) were used to help generate portions of this
+project's code and documentation. All LLM-assisted content was reviewed and edited and
+by myself.
 
 ## Roadmap to a PyPI release
 
