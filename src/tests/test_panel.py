@@ -1,6 +1,4 @@
 import unittest
-from types import SimpleNamespace
-from unittest.mock import Mock
 
 import django
 from django.conf import settings
@@ -11,6 +9,7 @@ if not settings.configured:
         STATIC_URL="/static/",
         INSTALLED_APPS=[
             "django.contrib.staticfiles",
+            "debug_toolbar",
             "django_datastar_toolbar",
         ],
         TEMPLATES=[
@@ -22,30 +21,37 @@ if not settings.configured:
     )
 django.setup()
 
-from django.http import HttpRequest, HttpResponse, QueryDict
+from django.http import HttpResponse
 from django.templatetags.static import static
+from django.test import RequestFactory, SimpleTestCase, override_settings
 
-from django_datastar_toolbar.panels import DatastarStorePanel
+from debug_toolbar.store import MemoryStore
+from debug_toolbar.toolbar import DebugToolbar
 
 
-class PanelTests(unittest.TestCase):
+@override_settings(
+    DEBUG_TOOLBAR_PANELS=["django_datastar_toolbar.panels.DatastarStorePanel"],
+    DEBUG_TOOLBAR_CONFIG={"TOOLBAR_STORE_CLASS": "debug_toolbar.store.MemoryStore"},
+)
+class PanelTests(SimpleTestCase):
     def setUp(self):
-        self.store = Mock(spec=["save_panel"])
-        self.toolbar = SimpleNamespace(
-            stats={}, store=self.store, request_id="request-1"
-        )
-        self.panel = DatastarStorePanel(self.toolbar, lambda request: HttpResponse())
+        MemoryStore.clear()
+        self.request = RequestFactory().get("/?signal=private-example")
+        self.toolbar = DebugToolbar(self.request, lambda request: HttpResponse())
+        self.panel = self.toolbar.get_panel_by_id("DatastarStorePanel")
+
+    def tearDown(self):
+        MemoryStore.clear()
 
     def test_generate_stats_saves_only_availability(self):
-        request = HttpRequest()
-        request.GET = QueryDict("signal=private-example")
         response = HttpResponse("private-example")
 
-        self.panel.generate_stats(request, response)
+        self.panel.generate_stats(self.request, response)
 
         self.assertEqual(self.panel.get_stats(), {"available": True})
-        self.store.save_panel.assert_called_once_with(
-            "request-1", "DatastarStorePanel", {"available": True}
+        self.assertEqual(
+            self.toolbar.store.panel(self.toolbar.request_id, self.panel.panel_id),
+            {"available": True},
         )
 
     def test_panel_properties(self):
