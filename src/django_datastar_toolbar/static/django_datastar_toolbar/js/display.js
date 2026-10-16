@@ -31,7 +31,7 @@ function appendJsonValue(parent, value, path, depth, marker) {
   const array = Array.isArray(value);
   const children = entries(value);
 
-  appendOpening(parent, value, marker);
+  appendOpening(parent, array, marker);
 
   for (const [index, [key, child]] of children.entries()) {
     const childPath = displayPath(path, key);

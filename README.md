@@ -59,6 +59,24 @@ Large language models (LLMs) were used to help generate portions of this
 project's code and documentation. All LLM-assisted content was reviewed and edited and
 by myself.
 
+## Run tests
+
+Run the Python panel tests:
+
+```sh
+python -m pytest tests/python/test_panel.py
+```
+
+Run the JavaScript tests in headless Chromium. Use Node.js 22.12 or newer in the 22 series, or use Node.js 24:
+
+```sh
+npm ci
+npx playwright install chromium
+npm test
+```
+
+The JavaScript tests use Vitest and Playwright. They test the DOM without a Django server or Datastar bundle.
+
 ## Roadmap to a PyPI release
 
 - [ ] Select supported Python, Django, toolbar, Datastar, and browser versions. Run installed-wheel tests across this list.
