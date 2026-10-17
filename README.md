@@ -1,12 +1,12 @@
-# Datastar Signals for Django Debug Toolbar (development package)
+# Datastar Signals for Django Debug Toolbar (release candidate)
 
 This is a **third-party panel** for [Django Debug Toolbar](https://django-debug-toolbar.readthedocs.io/en/latest/). It displays a browser-side JSON view of the current page's [Datastar signals](https://data-star.dev/guide/reactive_signals).
 
-![Datastar Signals panel with sample JSON beside Django’s welcome page and rocket](docs/images/datastar-signals-overview.png)
+![Datastar Signals panel beside Django's welcome page](https://raw.githubusercontent.com/MarcusL11/django-debug-toolbar-datastar/main/docs/images/datastar-signals-overview.png)
 
 Search highlights matching signal names and paths without hiding other values.
 
-<img src="docs/images/datastar-signals-search.png" alt="Search for launch with four highlighted paths and the second match selected" width="400" height="480">
+<img src="https://raw.githubusercontent.com/MarcusL11/django-debug-toolbar-datastar/main/docs/images/datastar-signals-search.png" alt="Search results with four matching paths" width="400" height="480">
 
 ## Core idea
 
@@ -20,10 +20,14 @@ For example, the collector holds `{"count":2}` when `count` is 2. When `count` c
 
 Use a local development environment with Python 3.10+, Django 5.2+, and Django Debug Toolbar 8.0.0+.
 
-Install the package from a fixed GitHub commit in your project's virtual environment. The package is not on PyPI.
+This candidate is not on PyPI.
+To test this checkout before an index release, build the wheel.
+Install it in your project's virtual environment:
 
 ```sh
-python -m pip install "git+https://github.com/MarcusL11/django-debug-toolbar-datastar.git@a03ca793f0fda690207ba4405cb93cf219c3b4a2"
+python -m pip install build
+python -m build
+python -m pip install dist/django_debug_toolbar_datastar-0.1.0rc1-py3-none-any.whl
 ```
 
 Keep your existing apps, including `django.contrib.staticfiles` and `debug_toolbar`. Add `django_datastar_toolbar` to `INSTALLED_APPS`:
@@ -63,9 +67,8 @@ Use sample data only. This panel does not hide sensitive values, and its raw JSO
 
 ## AI-assisted development
 
-Large language models (LLMs) were used to help generate portions of this
-project's code and documentation. All LLM-assisted content was reviewed and edited and
-by myself.
+Large language models (LLMs) helped create parts of this project's code and documentation.
+The author reviewed and edited all LLM-assisted content.
 
 ## Run tests
 
@@ -83,4 +86,10 @@ npx playwright install chromium
 npm test
 ```
 
-The JavaScript tests use Vitest and Playwright. They test the DOM without a Django server or Datastar bundle.
+The `npm test` suite tests the DOM without Django or Datastar.
+The full browser tests start Django and load the pinned full Datastar bundle.
+Run them with the Python environment that has this package installed:
+
+```sh
+TEST_PYTHON=python npm run test:e2e
+```
