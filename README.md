@@ -1,4 +1,4 @@
-# Datastar Signals for Django Debug Toolbar (release candidate)
+# Datastar Signals for Django Debug Toolbar
 
 This is a **third-party panel** for [Django Debug Toolbar](https://django-debug-toolbar.readthedocs.io/en/latest/). It displays a browser-side JSON view of the current page's [Datastar signals](https://data-star.dev/guide/reactive_signals).
 
@@ -20,14 +20,18 @@ For example, the collector holds `{"count":2}` when `count` is 2. When `count` c
 
 Use a local development environment with Python 3.10+, Django 5.2+, and Django Debug Toolbar 8.0.0+.
 
-This candidate is not on PyPI.
-To test this checkout before an index release, build the wheel.
-Install it in your project's virtual environment:
+Install version `0.1.0` from PyPI after its release:
+
+```sh
+python -m pip install django-debug-toolbar-datastar==0.1.0
+```
+
+Before publication, build and install the wheel from this checkout:
 
 ```sh
 python -m pip install build
 python -m build
-python -m pip install dist/django_debug_toolbar_datastar-0.1.0rc1-py3-none-any.whl
+python -m pip install dist/django_debug_toolbar_datastar-0.1.0-py3-none-any.whl
 ```
 
 Keep your existing apps, including `django.contrib.staticfiles` and `debug_toolbar`. Add `django_datastar_toolbar` to `INSTALLED_APPS`:
