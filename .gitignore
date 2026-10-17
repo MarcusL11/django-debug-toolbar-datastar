@@ -9,3 +9,4 @@ __pycache__/
 .env
 learning_notes
 .pytest_cache/
+qrspi/
