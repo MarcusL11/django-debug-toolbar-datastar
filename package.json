@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
+    "test:e2e": "node --test tests/e2e/*.test.js",
     "test:watch": "vitest"
   },
   "devDependencies": {

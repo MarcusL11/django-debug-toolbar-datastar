@@ -1,22 +1,20 @@
 # Datastar Signals for Django Debug Toolbar (development package)
 
-This is an **third-party panel** for [ Django Debug Toolbar ]( https://django-debug-toolbar.readthedocs.io/en/latest/ ). It displays a browser-side JSON projection of the current page's [ Datastar Reactive Signal ]( https://data-star.dev/guide/reactive_signals ) store. This package is still in the process of being developed. It has not been released to PyPI.
-
-## Screenshots
-
-The Datastar Signals panel beside Django’s default welcome page. This temporary demo uses sample data.
+This is a **third-party panel** for [Django Debug Toolbar](https://django-debug-toolbar.readthedocs.io/en/latest/). It displays a browser-side JSON view of the current page's [Datastar signals](https://data-star.dev/guide/reactive_signals).
 
 ![Datastar Signals panel with sample JSON beside Django’s welcome page and rocket](docs/images/datastar-signals-overview.png)
 
-Search highlights matching signal names and paths without hiding other values. Press Enter to select the next match.
+Search highlights matching signal names and paths without hiding other values.
 
 <img src="docs/images/datastar-signals-search.png" alt="Search for launch with four highlighted paths and the second match selected" width="400" height="480">
 
 ## Core idea
 
-Django Debug Toolbar provides the panel UI, but Datastar actually owns the signals in the browser. Those signals live only in the page’s DOM (not in the HTTP response), so Django itself can't read them. The page template just includes a status line, a search box, and an output element, and a small script creates a hidden "collector" element in the body that Datastar uses.
+This plugin displays Datastar signals from the page DOM. The template includes a search field. A script creates a hidden collector element in the document body for Datastar.
 
-The collector is a live text view of the signal store: Datastar writes compact JSON into a data attribute (data-json-signals__terse) and the panel reads that text to render the current state. The panel only shows the current projection — it doesn't keep a history. For example, if a "count" is 2 the collector holds {"count":2}; when it becomes 3 a MutationObserver calls render(), the panel parses the new JSON, and the UI updates. A panel that opens later just reads the collector's current JSON and doesn't need past events.
+The collector shows the current signals as JSON. Datastar reads `data-json-signals__terse` and writes JSON to the collector text. The panel reads this text and does not keep a history.
+
+For example, the collector holds `{"count":2}` when `count` is 2. When `count` changes to 3, a `MutationObserver` calls `render()` and the panel shows the new value. A panel that opens later reads the current JSON from the collector.
 
 ## Install in a Django project
 
@@ -86,13 +84,3 @@ npm test
 ```
 
 The JavaScript tests use Vitest and Playwright. They test the DOM without a Django server or Datastar bundle.
-
-## Roadmap to a PyPI release
-
-- [ ] Select supported Python, Django, toolbar, Datastar, and browser versions. Run installed-wheel tests across this list.
-- [ ] Add browser tests to CI for lazy and eager panels, shadow and light DOM, and live signal changes.
-- [ ] Review license notices and third-party assets in the final source and build files.
-- [ ] First version. Update the install steps after the PyPI release.
-- [ ] Build wheel and source archives from the release commit. Check metadata, license, templates, static files, and the installed result.
-- [ ] Testing PyPI install in a Django project. 
-- [ ] Request s third-party panel listing request after release.
