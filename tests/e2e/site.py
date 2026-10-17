@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import django
@@ -21,7 +22,10 @@ settings.configure(
         {"BACKEND": "django.template.backends.django.DjangoTemplates", "APP_DIRS": True}
     ],
     DEBUG_TOOLBAR_PANELS=["django_datastar_toolbar.panels.DatastarStorePanel"],
-    DEBUG_TOOLBAR_CONFIG={"RENDER_PANELS": True, "USE_SHADOW_DOM": True},
+    DEBUG_TOOLBAR_CONFIG={
+        "RENDER_PANELS": os.environ.get("TEST_RENDER_PANELS", "1") == "1",
+        "USE_SHADOW_DOM": os.environ.get("TEST_SHADOW_DOM", "1") == "1",
+    },
 )
 django.setup()
 

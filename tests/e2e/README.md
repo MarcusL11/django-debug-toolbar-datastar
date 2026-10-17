@@ -1,10 +1,12 @@
-# Full browser test
+# Full browser tests
 
-This test starts a small Django site with the real Debug Toolbar panel.
-It loads the pinned full Datastar bundle from `vendor/`.
-A click changes a Datastar signal.
-The test checks both the signal text and the panel output.
-It does not write JSON into the collector.
+These tests start a small Django site with the real Debug Toolbar panel.
+They cover an eager shadow panel, a lazy shadow panel, and an eager light DOM panel.
+The lazy test changes a signal before it opens the panel, then changes it again.
+
+The site loads the pinned full Datastar bundle from `vendor/`.
+The tests check the signal text, collector, and panel output.
+They do not write JSON into the collector.
 
 Install this Python package in a local environment.
 Install the JavaScript dependencies and Chromium.
