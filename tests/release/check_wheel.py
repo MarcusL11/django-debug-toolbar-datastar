@@ -1,3 +1,4 @@
+import argparse
 import os
 import subprocess
 import sys
@@ -20,9 +21,16 @@ def check_source_archive(directory):
 
 
 def main():
-    wheels = [Path(path).resolve() for path in sys.argv[1:]]
-    assert len(wheels) == 1 and wheels[0].is_file(), wheels
-    check_source_archive(wheels[0].parent)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("wheel", type=Path)
+    parser.add_argument("--constraints", type=Path)
+    args = parser.parse_args()
+    wheel = args.wheel.resolve()
+    assert wheel.is_file(), wheel
+    check_source_archive(wheel.parent)
+    constraints = args.constraints.resolve() if args.constraints else None
+    if constraints is not None:
+        assert constraints.is_file(), constraints
 
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
@@ -31,8 +39,11 @@ def main():
         python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         env = os.environ.copy()
         env.pop("PYTHONPATH", None)
+        pip_args = [str(python), "-m", "pip", "install"]
+        if constraints is not None:
+            pip_args.extend(["-c", str(constraints)])
         subprocess.run(
-            [str(python), "-m", "pip", "install", str(wheels[0])],
+            [*pip_args, str(wheel)],
             cwd=root,
             env=env,
             check=True,
