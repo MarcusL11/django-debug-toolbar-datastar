@@ -2,6 +2,8 @@
 
 This is a **third-party panel** for [Django Debug Toolbar](https://django-debug-toolbar.readthedocs.io/en/latest/). It displays a browser-side JSON view of the current page's [Datastar signals](https://data-star.dev/guide/reactive_signals).
 
+The panel appears in [Django Debug Toolbar's third-party panel list](https://django-debug-toolbar.readthedocs.io/en/latest/panels.html#datastar-signals). Django Debug Toolbar does not install or enable it automatically.
+
 ![Datastar Signals panel beside Django's welcome page](https://raw.githubusercontent.com/MarcusL11/django-debug-toolbar-datastar/main/docs/images/datastar-signals-overview.png)
 
 Search highlights matching signal names and paths without hiding other values.
@@ -20,18 +22,10 @@ For example, the collector holds `{"count":2}` when `count` is 2. When `count` c
 
 Use a local development environment with Python 3.10+, Django 5.2+, and Django Debug Toolbar 8.0.0+.
 
-Install version `0.1.0` from PyPI after its release:
+Install from PyPI:
 
 ```sh
 python -m pip install django-debug-toolbar-datastar==0.1.0
-```
-
-Before publication, build and install the wheel from this checkout:
-
-```sh
-python -m pip install build
-python -m build
-python -m pip install dist/django_debug_toolbar_datastar-0.1.0-py3-none-any.whl
 ```
 
 Keep your existing apps, including `django.contrib.staticfiles` and `debug_toolbar`. Add `django_datastar_toolbar` to `INSTALLED_APPS`:
@@ -73,6 +67,16 @@ Use sample data only. This panel does not hide sensitive values, and its raw JSO
 
 Large language models (LLMs) helped create parts of this project's code and documentation.
 The author reviewed and edited all LLM-assisted content.
+
+## Build for local development
+
+Build and install the wheel from this checkout:
+
+```sh
+python -m pip install build
+python -m build
+python -m pip install dist/django_debug_toolbar_datastar-0.1.0-py3-none-any.whl
+```
 
 ## Run tests
 
